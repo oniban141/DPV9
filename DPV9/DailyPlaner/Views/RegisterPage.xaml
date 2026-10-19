@@ -1,0 +1,40 @@
+<Page x:Class="DailyPlaner.Views.RegisterPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:DailyPlaner"
+        Title="Регистрация" Width="300">
+    <Grid>
+        <StackPanel Margin="20" VerticalAlignment="Center">
+            <TextBlock Text="DailyPlanerV8" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+            <TextBlock Text="Имя пользователя" Margin="0,0,0,4"/>
+            <Grid Margin="0,0,0,12">
+                <TextBox x:Name="UsernameBox"/>
+            </Grid>
+            <TextBlock Text="Пароль" Margin="0,0,0,4"/>
+            <Grid Margin="0,0,0,12">
+                <PasswordBox x:Name="PasswordBox"/>
+            </Grid>
+            <TextBlock Text="Подтвердите пароль" Margin="0,0,0,4"/>
+            <Grid Margin="0,0,0,12">
+                <PasswordBox x:Name="ConfirmPasswordBox"/>
+            </Grid>
+            <TextBlock Text="Email" Margin="0,0,0,4"/>
+            <Grid Margin="0,0,0,12">
+                <TextBox x:Name="EmailBox"/>
+            </Grid>
+            <TextBlock Text="Пол" Margin="0,0,0,4"/>
+            <Grid Margin="0,0,0,16">
+                <ComboBox x:Name="GenderComboBox"/>
+            </Grid>
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="Назад"/>
+                <Button Grid.Column="2" Content="Зарегистрироваться"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Page>
