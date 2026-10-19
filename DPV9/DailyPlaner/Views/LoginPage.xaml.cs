@@ -1,9 +1,8 @@
 using System;
-using System.Data;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using DailyPlaner.Entities;
+using DailyPlaner.Services;
 
 namespace DailyPlaner.Views
 {
@@ -25,8 +24,8 @@ namespace DailyPlaner.Views
             }
             try
             {
-                string hash = App.GetHash(password);
-                User user = App.Context.Users.FirstOrDefault(x => x.Username == username && x.PasswordHash == hash);
+                string hash = DatabaseService.GetHash(password);
+                User user = DatabaseService.FindUser(username, hash);
                 if (user == null)
                 {
                     MessageBox.Show("Неверный логин или пароль", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);

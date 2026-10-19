@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using DailyPlaner.Entities;
+using DailyPlaner.Services;
 using Microsoft.Win32;
 
 namespace DailyPlaner
@@ -184,27 +185,16 @@ namespace DailyPlaner
             {
                 if (item.Kind == "Задача")
                 {
-                    List<Reminder> reminders = App.Context.Reminders.Where(x => x.TaskId == item.Id).ToList();
-                    for (int i = 0; i < reminders.Count; i++)
-                    {
-                        App.Context.Reminders.Remove(reminders[i]);
-                    }
-                    App.Context.Tasks.Remove(item.Task);
+                    DatabaseService.DeleteTask(item.Task);
                 }
                 if (item.Kind == "Событие")
                 {
-                    List<Reminder> reminders = App.Context.Reminders.Where(x => x.EventId == item.Id).ToList();
-                    for (int i = 0; i < reminders.Count; i++)
-                    {
-                        App.Context.Reminders.Remove(reminders[i]);
-                    }
-                    App.Context.Events.Remove(item.Event);
+                    DatabaseService.DeleteEvent(item.Event);
                 }
                 if (item.Kind == "Заметка")
                 {
-                    App.Context.Notes.Remove(item.Note);
+                    DatabaseService.DeleteNote(item.Note);
                 }
-                App.Context.SaveChanges();
                 LoadItems();
             }
             catch (Exception)
@@ -237,8 +227,7 @@ namespace DailyPlaner
             }
             try
             {
-                item.Task.Status = newStatus;
-                App.Context.SaveChanges();
+                DatabaseService.SetTaskStatus(item.Task, newStatus);
                 LoadItems();
             }
             catch (Exception)
@@ -267,9 +256,7 @@ namespace DailyPlaner
             SelectedDateText.Text = "Записи на " + selectedDate.ToShortDateString();
             try
             {
-                DateTime start = selectedDate.Date;
-                DateTime end = selectedDate.Date.AddDays(1);
-                List<Task> tasks = App.Context.Tasks.Where(x => x.UserId == App.CurrentUser.Id && x.DueDate >= start && x.DueDate < end).OrderBy(x => x.DueDate).ToList();
+                List<Task> tasks = DatabaseService.GetTasksForDate(App.CurrentUser.Id, selectedDate);
                 for (int i = 0; i < tasks.Count; i++)
                 {
                     DayItem item = new DayItem();
@@ -286,7 +273,7 @@ namespace DailyPlaner
                     item.Task = tasks[i];
                     items.Add(item);
                 }
-                List<Event> events = App.Context.Events.Where(x => x.UserId == App.CurrentUser.Id && x.StartDate >= start && x.StartDate < end).OrderBy(x => x.StartDate).ToList();
+                List<Event> events = DatabaseService.GetEventsForDate(App.CurrentUser.Id, selectedDate);
                 for (int i = 0; i < events.Count; i++)
                 {
                     DayItem item = new DayItem();
@@ -303,7 +290,7 @@ namespace DailyPlaner
                     items.Add(item);
                 }
                 items.Sort(SortByTime);
-                List<Note> notes = App.Context.Notes.Where(x => x.UserId == App.CurrentUser.Id).OrderBy(x => x.CreatedAt).ToList();
+                List<Note> notes = DatabaseService.GetNotes(App.CurrentUser.Id);
                 for (int i = 0; i < notes.Count; i++)
                 {
                     DayItem item = new DayItem();
@@ -363,33 +350,12 @@ namespace DailyPlaner
 
         private void CheckRemindersButton_Click(object sender, RoutedEventArgs e)
         {
-            CheckReminders();
+            NotificationService.CheckReminders();
         }
 
         private void ReminderTimer_Tick(object sender, EventArgs e)
         {
-            CheckReminders();
-        }
-
-        private void CheckReminders()
-        {
-            try
-            {
-                DateTime now = DateTime.Now;
-                List<Reminder> reminders = App.Context.Reminders.Where(x => x.UserId == App.CurrentUser.Id && x.IsActive).ToList();
-                for (int i = 0; i < reminders.Count; i++)
-                {
-                    if (reminders[i].ReminderTime <= now && reminders[i].ReminderTime.AddHours(1) > now)
-                    {
-                        MessageBox.Show(reminders[i].Message, "Напоминание", MessageBoxButton.OK, MessageBoxImage.Information);
-                        reminders[i].IsActive = false;
-                    }
-                }
-                App.Context.SaveChanges();
-            }
-            catch (Exception)
-            {
-            }
+            NotificationService.CheckReminders();
         }
 
         private void LoadAutoStart()

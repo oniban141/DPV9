@@ -1,9 +1,9 @@
 using System;
-using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using DailyPlaner.Entities;
+using DailyPlaner.Services;
 
 namespace DailyPlaner.Views
 {
@@ -49,32 +49,22 @@ namespace DailyPlaner.Views
             }
             try
             {
-                User found = App.Context.Users.FirstOrDefault(x => x.Username == username);
-                if (found != null)
+                if (DatabaseService.UserExists(username))
                 {
                     MessageBox.Show("Пользователь с таким именем уже существует", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 User user = new User();
                 user.Username = username;
-                user.PasswordHash = App.GetHash(password);
+                user.PasswordHash = DatabaseService.GetHash(password);
                 user.Email = email;
                 if (gender != null)
                 {
                     user.GenderId = gender.Id;
                 }
-                Role userRole = App.Context.Roles.FirstOrDefault(x => x.Name == "Пользователь");
-                if (userRole == null)
-                {
-                    userRole = App.Context.Roles.FirstOrDefault();
-                }
-                if (userRole != null)
-                {
-                    user.RoleId = userRole.Id;
-                }
+                // TODO: укажите здесь нужную роль, например: user.RoleId = 1;
                 user.CreatedAt = DateTime.Now;
-                App.Context.Users.Add(user);
-                App.Context.SaveChanges();
+                DatabaseService.AddUser(user);
                 MessageBox.Show("Регистрация прошла успешно", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 NavigationService.GoBack();
             }

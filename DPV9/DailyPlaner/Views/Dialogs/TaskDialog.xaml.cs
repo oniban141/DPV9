@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using DailyPlaner.Entities;
+using DailyPlaner.Services;
 
 namespace DailyPlaner.Views.Dialogs
 {
@@ -27,10 +27,8 @@ namespace DailyPlaner.Views.Dialogs
             currentTask = task;
             TitleBox.Text = task.Title;
             DescriptionBox.Text = task.Description;
-            FillTime();
             DueDatePicker.SelectedDate = task.DueDate.Date;
             TimeComboBox.Text = task.DueDate.ToString("HH:mm");
-            FillPriorities();
             PriorityComboBox.Text = task.Priority;
         }
 
@@ -77,17 +75,12 @@ namespace DailyPlaner.Views.Dialogs
             {
                 errors = errors + "Выберите приоритет\n";
             }
-            if (errors == "")
+            if (errors == "" && isNew)
             {
-                if (isNew)
+                int count = DatabaseService.CountTasksForDate(App.CurrentUser.Id, dueDate);
+                if (count >= 100)
                 {
-                    DateTime start = dueDate.Date;
-                    DateTime end = dueDate.Date.AddDays(1);
-                    int count = App.Context.Tasks.Count(x => x.UserId == App.CurrentUser.Id && x.DueDate >= start && x.DueDate < end);
-                    if (count >= 100)
-                    {
-                        errors = errors + "На этот день уже добавлено максимум 100 задач\n";
-                    }
+                    errors = errors + "На этот день уже добавлено максимум 100 задач\n";
                 }
             }
             return errors;
@@ -119,61 +112,19 @@ namespace DailyPlaner.Views.Dialogs
                 if (isNew)
                 {
                     currentTask.Status = "Не выполнено";
-                    App.Context.Tasks.Add(currentTask);
                 }
-                App.Context.SaveChanges();
-                SaveReminder("Задача", currentTask.Id, dueDate, currentTask.Title);
+                DatabaseService.SaveTask(currentTask, isNew);
+                int offsetMinutes = 0;
+                if (ReminderCheckBox.IsChecked == true && ReminderOffsetComboBox.Text != "")
+                {
+                    offsetMinutes = GetOffsetMinutes();
+                }
+                DatabaseService.SaveReminder("Задача", currentTask.Id, dueDate, currentTask.Title, offsetMinutes);
                 DialogResult = true;
             }
             catch (Exception)
             {
                 MessageBox.Show("Не удалось сохранить задачу. Проверьте подключение к базе данных", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void SaveReminder(string kind, int itemId, DateTime startDate, string title)
-        {
-            try
-            {
-                if (kind == "Задача")
-                {
-                    List<Reminder> old = App.Context.Reminders.Where(x => x.TaskId == itemId).ToList();
-                    for (int i = 0; i < old.Count; i++)
-                    {
-                        App.Context.Reminders.Remove(old[i]);
-                    }
-                    App.Context.SaveChanges();
-                }
-                if (kind == "Событие")
-                {
-                    List<Reminder> old = App.Context.Reminders.Where(x => x.EventId == itemId).ToList();
-                    for (int i = 0; i < old.Count; i++)
-                    {
-                        App.Context.Reminders.Remove(old[i]);
-                    }
-                    App.Context.SaveChanges();
-                }
-                if (ReminderCheckBox.IsChecked == true && ReminderOffsetComboBox.Text != "")
-                {
-                    Reminder reminder = new Reminder();
-                    reminder.UserId = App.CurrentUser.Id;
-                    if (kind == "Задача")
-                    {
-                        reminder.TaskId = itemId;
-                    }
-                    else
-                    {
-                        reminder.EventId = itemId;
-                    }
-                    reminder.ReminderTime = startDate.AddMinutes(-GetOffsetMinutes());
-                    reminder.Message = "Скоро начнётся: " + title + " (" + startDate.ToString("dd.MM.yyyy HH:mm") + ")";
-                    reminder.IsActive = true;
-                    App.Context.Reminders.Add(reminder);
-                    App.Context.SaveChanges();
-                }
-            }
-            catch (Exception)
-            {
             }
         }
 
@@ -215,6 +166,8 @@ namespace DailyPlaner.Views.Dialogs
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            FillTime();
+            FillPriorities();
             if (isNew)
             {
                 DueDatePicker.SelectedDate = SelectedDate.Date;

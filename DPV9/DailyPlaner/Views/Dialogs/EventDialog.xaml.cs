@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using DailyPlaner.Entities;
+using DailyPlaner.Services;
 
 namespace DailyPlaner.Views.Dialogs
 {
@@ -112,44 +112,18 @@ namespace DailyPlaner.Views.Dialogs
                 currentEvent.EndDate = endDate;
                 currentEvent.Location = LocationBox.Text.Trim();
                 currentEvent.Status = "Запланировано";
-                if (isNew)
+                DatabaseService.SaveEvent(currentEvent, isNew);
+                int offsetMinutes = 0;
+                if (ReminderCheckBox.IsChecked == true && ReminderOffsetComboBox.Text != "")
                 {
-                    App.Context.Events.Add(currentEvent);
+                    offsetMinutes = GetOffsetMinutes();
                 }
-                App.Context.SaveChanges();
-                SaveReminder(currentEvent.Id, startDate, currentEvent.Title);
+                DatabaseService.SaveReminder("Событие", currentEvent.Id, startDate, currentEvent.Title, offsetMinutes);
                 DialogResult = true;
             }
             catch (Exception)
             {
                 MessageBox.Show("Не удалось сохранить событие. Проверьте подключение к базе данных", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void SaveReminder(int eventId, DateTime startDate, string title)
-        {
-            try
-            {
-                List<Reminder> old = App.Context.Reminders.Where(x => x.EventId == eventId).ToList();
-                for (int i = 0; i < old.Count; i++)
-                {
-                    App.Context.Reminders.Remove(old[i]);
-                }
-                App.Context.SaveChanges();
-                if (ReminderCheckBox.IsChecked == true && ReminderOffsetComboBox.Text != "")
-                {
-                    Reminder reminder = new Reminder();
-                    reminder.UserId = App.CurrentUser.Id;
-                    reminder.EventId = eventId;
-                    reminder.ReminderTime = startDate.AddMinutes(-GetOffsetMinutes());
-                    reminder.Message = "Скоро начнётся: " + title + " (" + startDate.ToString("dd.MM.yyyy HH:mm") + ")";
-                    reminder.IsActive = true;
-                    App.Context.Reminders.Add(reminder);
-                    App.Context.SaveChanges();
-                }
-            }
-            catch (Exception)
-            {
             }
         }
 

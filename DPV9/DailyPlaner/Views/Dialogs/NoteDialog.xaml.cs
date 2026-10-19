@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using DailyPlaner.Entities;
+using DailyPlaner.Services;
 
 namespace DailyPlaner.Views.Dialogs
 {
@@ -55,9 +56,8 @@ namespace DailyPlaner.Views.Dialogs
                 if (isNew)
                 {
                     currentNote.CreatedAt = DateTime.Now;
-                    App.Context.Notes.Add(currentNote);
                 }
-                App.Context.SaveChanges();
+                DatabaseService.SaveNote(currentNote, isNew);
                 DialogResult = true;
             }
             catch (Exception)
