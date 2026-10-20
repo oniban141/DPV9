@@ -321,6 +321,10 @@ namespace DailyPlaner
 
         private void ShowItems()
         {
+            if (DayItemsList == null)
+            {
+                return;
+            }
             DayItemsList.Items.Clear();
             string search = SearchBox.Text.Trim();
             for (int i = 0; i < currentItems.Count; i++)
@@ -346,6 +350,10 @@ namespace DailyPlaner
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (DayItemsList == null)
+            {
+                return;
+            }
             ShowItems();
         }
 
