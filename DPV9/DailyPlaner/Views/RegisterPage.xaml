@@ -32,8 +32,8 @@
                     <ColumnDefinition Width="10"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="Назад"/>
-                <Button Grid.Column="2" Content="Зарегистрироваться"/>
+                <Button Grid.Column="0" Content="Назад" Click="Back_Click"/>
+                <Button Grid.Column="2" Content="Зарегистрироваться" Click="Register_Click"/>
             </Grid>
         </StackPanel>
     </Grid>
