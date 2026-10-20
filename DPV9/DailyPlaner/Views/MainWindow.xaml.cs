@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using DailyPlaner.Entities;
 using DailyPlaner.Services;
+using DailyPlaner.Views.Dialogs;
 using Microsoft.Win32;
 
 namespace DailyPlaner
