@@ -19,7 +19,10 @@ namespace DailyPlaner.Views
         {
             try
             {
-                GenderComboBox.ItemsSource = App.Context.Genders.ToList();
+                using (DailyPlannerDBV3Entities context = new DailyPlannerDBV3Entities())
+                {
+                    GenderComboBox.ItemsSource = context.Genders.ToList();
+                }
                 GenderComboBox.DisplayMemberPath = "Name";
                 GenderComboBox.SelectedIndex = 0;
             }

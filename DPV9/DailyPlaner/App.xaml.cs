@@ -10,7 +10,15 @@ namespace DailyPlaner
 {
     public partial class App : Application
     {
-        public static DailyPlannerDBV3Entities Context = new DailyPlannerDBV3Entities();
+        public static DailyPlannerDBV3Entities Context
+        {
+            get
+            {
+                DailyPlannerDBV3Entities context = new DailyPlannerDBV3Entities();
+                return context;
+            }
+        }
+
         public static User CurrentUser;
 
         public static string GetHash(string text)
