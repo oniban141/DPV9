@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Windows;
 using DailyPlaner.Entities;
@@ -13,16 +14,19 @@ namespace DailyPlaner.Services
             try
             {
                 DateTime now = DateTime.Now;
-                List<Reminder> reminders = App.Context.Reminders.Where(x => x.UserId == App.CurrentUser.Id && x.IsActive).ToList();
-                for (int i = 0; i < reminders.Count; i++)
+                using (DailyPlannerDBV3Entities context = new DailyPlannerDBV3Entities())
                 {
-                    if (reminders[i].ReminderTime <= now && reminders[i].ReminderTime.AddHours(1) > now)
+                    List<Reminder> reminders = context.Reminders.Where(x => x.UserId == App.CurrentUser.Id && x.IsActive).ToList();
+                    for (int i = 0; i < reminders.Count; i++)
                     {
-                        MessageBox.Show(reminders[i].Message, "Напоминание", MessageBoxButton.OK, MessageBoxImage.Information);
-                        reminders[i].IsActive = false;
+                        if (reminders[i].ReminderTime <= now && reminders[i].ReminderTime.AddHours(1) > now)
+                        {
+                            MessageBox.Show(reminders[i].Message, "Напоминание", MessageBoxButton.OK, MessageBoxImage.Information);
+                            reminders[i].IsActive = false;
+                        }
                     }
+                    context.SaveChanges();
                 }
-                App.Context.SaveChanges();
             }
             catch (Exception)
             {

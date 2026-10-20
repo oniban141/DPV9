@@ -58,7 +58,7 @@
             </StackPanel>
             <Grid Grid.Row="1" Margin="0,0,0,6">
                 <TextBlock x:Name="SelectedDateText" Text="" FontWeight="Bold" FontSize="14"/>
-                <TextBox x:Name="SearchBox" Text="Поиск" HorizontalAlignment="Right" Width="250" TextChanged="SearchBox_TextChanged"/>
+                <TextBox x:Name="SearchBox" HorizontalAlignment="Right" Width="250" TextChanged="SearchBox_TextChanged"/>
             </Grid>
             <ListView Grid.Row="2" x:Name="DayItemsList" ScrollViewer.VerticalScrollBarVisibility="Auto"
                       MouseDoubleClick="DayItemsList_MouseDoubleClick">
